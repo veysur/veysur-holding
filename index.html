@@ -5,6 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VeySur - Coming Soon</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <script>
+        (function () {
+            var saved = localStorage.getItem('veysur-theme');
+            if (saved === 'light' || saved === 'dark') {
+                document.documentElement.setAttribute('data-theme', saved);
+            }
+        })();
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -12,27 +20,201 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: oklch(0.9624 0.0025 48.72);
+            --fg: oklch(0.147 0.004 49.25);
+            --bg-pattern: url('image/survey-bg-light.jpg');
+            --toggle-bg: oklch(1 0 0 / 0.6);
+            --toggle-border: oklch(0.147 0.004 49.25 / 0.12);
+            --card: oklch(0.97 0.001 106.424);
+            --card-foreground: oklch(0.268 0.007 34.298);
+            --border: oklch(0.869 0.005 56.366);
+            --muted: oklch(0.923 0.005 56.366);
+            --primary: oklch(43.039% 0.11754 137.924);
+            --hero-glow: radial-gradient(ellipse 90% 60% at 50% -5%, oklch(from var(--primary) l calc(c * 0.5) h / 0.12), transparent 80%);
+            --brand-gradient: linear-gradient(90deg, oklch(from var(--primary) calc(l * 1.24) calc(c * 1.24) h), oklch(from var(--primary) calc(l * 0.94) calc(c * 0.94) h));
+            --glow-opacity: 0.04;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg: oklch(0.21 0 0);
+                --fg: oklch(0.985 0 0);
+                --bg-pattern: url('image/survey-bg-dark.jpg');
+                --toggle-bg: oklch(1 0 0 / 0.08);
+                --toggle-border: oklch(0.985 0 0 / 0.16);
+                --primary: oklch(from oklch(43.039% 0.11754 137.924) calc(l * 0.9) calc(c * 0.9) h);
+                --card: oklch(0.191 0 0);
+                --card-foreground: oklch(0.985 0 0);
+                --border: oklch(0.29 0 0);
+                --muted: oklch(0.24 0 0);
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: oklch(0.21 0 0);
+            --fg: oklch(0.985 0 0);
+            --bg-pattern: url('image/survey-bg-dark.jpg');
+            --toggle-bg: oklch(1 0 0 / 0.08);
+            --toggle-border: oklch(0.985 0 0 / 0.16);
+            --primary: oklch(from oklch(43.039% 0.11754 137.924) calc(l * 0.9) calc(c * 0.9) h);
+            --card: oklch(0.191 0 0);
+            --card-foreground: oklch(0.985 0 0);
+            --border: oklch(0.29 0 0);
+            --muted: oklch(0.20 0 0);
+        }
+
         body {
             font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f5f4f1;
-            color: #1a202c;
+            background-color: var(--bg);
+            color: var(--fg);
             text-align: center;
-            display: grid;
-            place-items: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             min-height: 100vh;
             line-height: 1.6;
             font-feature-settings: 'kern' 1, 'liga' 1;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            position: relative;
+            isolation: isolate;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: var(--bg-pattern);
+            background-repeat: repeat;
+            background-size: 480px;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--hero-glow);
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .glow-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(64px);
+            opacity: var(--glow-opacity);
+            pointer-events: none;
+            z-index: -2;
+        }
+
+        .glow-blob-corner {
+            top: -8rem;
+            right: -8rem;
+            width: 500px;
+            height: 500px;
+            background: var(--brand-gradient);
+        }
+
+        .glow-blob-center {
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 256px;
+            background: radial-gradient(ellipse, var(--primary), transparent 70%);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            border: 1px solid var(--toggle-border);
+            background: var(--toggle-bg);
+            color: var(--fg);
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.08);
+        }
+
+        .theme-toggle svg {
+            width: 1.15rem;
+            height: 1.15rem;
+        }
+
+        .theme-toggle .icon-dark {
+            display: none;
+        }
+
+        :root[data-theme="dark"] .theme-toggle .icon-light {
+            display: none;
+        }
+
+        :root[data-theme="dark"] .theme-toggle .icon-dark {
+            display: block;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .theme-toggle .icon-light {
+                display: none;
+            }
+
+            :root:not([data-theme="light"]) .theme-toggle .icon-dark {
+                display: block;
+            }
         }
 
         .container {
             max-width: 680px;
-            padding: 3rem 2rem;
             width: 100%;
+            margin: 0 auto;
+            padding: 3rem 2rem 0;
             animation: fadeInUp 0.8s ease-out;
+        }
+
+        .message-section {
+            position: relative;
+            width: 100vw;
+            left: 50%;
+            right: 50%;
+            margin-left: -50vw;
+            margin-right: -50vw;
+            margin-top: 3rem;
+            background: var(--muted);
+        }
+
+        .message-section::before,
+        .message-section::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2rem;
+            pointer-events: none;
+        }
+
+        .message-section::before {
+            top: -2rem;
+            background: linear-gradient(to bottom, transparent, var(--muted));
+        }
+
+        .message-section::after {
+            bottom: -2rem;
+            background: linear-gradient(to top, transparent, var(--muted));
         }
 
         @keyframes fadeInUp {
@@ -46,49 +228,79 @@
             }
         }
 
-        .logo-img {
-            height: 100px;
+        .logo-card {
+            display: inline-block;
+            background: var(--card);
+            color: var(--card-foreground);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 2px 0 oklch(0 0 0 / 0.05);
+            padding: 2rem 2.5rem;
             transition: transform 0.3s ease;
         }
 
-        .logo-img:hover {
+        .logo-card:hover {
             transform: scale(1.05);
         }
 
-        .coming-soon {
-            font-size: clamp(1.4rem, 3vw, 2rem);
-            margin-top: 3rem;
-            margin-bottom: 2.5rem;
-            color: #2d3748;
-            font-weight: 600;
-            position: relative;
-            display: inline-block;
+        .logo-img {
+            height: 100px;
         }
 
-        .coming-soon::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, #56AD2E, #316618);
-            border-radius: 2px;
+        .logo-dark {
+            display: none;
+        }
+
+        :root[data-theme="dark"] .logo-light {
+            display: none;
+        }
+
+        :root[data-theme="dark"] .logo-dark {
+            display: inline;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) .logo-light {
+                display: none;
+            }
+
+            :root:not([data-theme="light"]) .logo-dark {
+                display: inline;
+            }
+        }
+
+        .message {
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            margin: 0;
+            padding: 0 2rem;
+            color: inherit;
+            font-weight: 600;
         }
 
         @media (max-width: 768px) {
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+            }
+
             .container {
-                padding: 2rem 1.5rem;
+                padding: 2rem 1.5rem 0;
+            }
+
+            .message-section {
+                margin-top: 2rem;
+            }
+
+            .logo-card {
+                padding: 1.5rem 2rem;
             }
 
             .logo-img {
                 height: 80px;
             }
 
-            .coming-soon {
-                margin-top: 2rem;
-                margin-bottom: 2rem;
+            .message {
+                padding: 0 1.5rem;
             }
         }
 
@@ -97,16 +309,51 @@
                 animation: none;
             }
 
-            .logo-img {
+            .logo-card,
+            .theme-toggle {
                 transition: none;
             }
         }
     </style>
 </head>
 <body>
+    <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+        <svg class="icon-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+        </svg>
+        <svg class="icon-dark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+    <div class="glow-blob glow-blob-corner"></div>
+    <div class="glow-blob glow-blob-center"></div>
     <div class="container">
-        <img src="image/veysur-logo-light.svg" alt="VeySur Logo" class="logo-img">
-        <div class="coming-soon">Coming soon...</div>
+        <div class="logo-card">
+            <img src="image/veysur-logo-light.svg" alt="VeySur Logo" class="logo-img logo-light">
+            <img src="image/veysur-logo-dark.svg" alt="VeySur Logo" class="logo-img logo-dark">
+        </div>
     </div>
+    <section class="message-section">
+        <div class="message">Be right back ...</div>
+    </section>
+    <script>
+        (function () {
+            var toggle = document.getElementById('theme-toggle');
+            var root = document.documentElement;
+
+            function resolvedTheme() {
+                var explicit = root.getAttribute('data-theme');
+                if (explicit) return explicit;
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+
+            toggle.addEventListener('click', function () {
+                var next = resolvedTheme() === 'dark' ? 'light' : 'dark';
+                root.setAttribute('data-theme', next);
+                localStorage.setItem('veysur-theme', next);
+            });
+        })();
+    </script>
 </body>
 </html>
